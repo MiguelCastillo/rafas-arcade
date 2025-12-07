@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Waves - Tunnel Runner</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-overlay">
+            <div id="level-name">NEON VOID</div>
+            <div id="score">0</div>
+            <div id="high-score">BEST: 0</div>
+        </div>
+        <div id="start-screen">
+            <h1>SPACE WAVES</h1>
+            <p class="subtitle">Navigate the void</p>
+            <div class="instructions">
+                <span class="key">SPACE</span> or <span class="key">CLICK</span> to fly
+            </div>
+            <button id="start-btn">START</button>
+        </div>
+        <div id="game-over-screen" class="hidden">
+            <h2>SIGNAL LOST</h2>
+            <p class="final-score">SCORE: <span id="final-score-value">0</span></p>
+            <p class="checkpoint-info">CHECKPOINT: <span id="checkpoint-value">0</span></p>
+            <button id="restart-btn">RESPAWN</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+
