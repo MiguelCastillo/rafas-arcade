@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometry Jump</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="background-layer"></div>
+        <div class="stars"></div>
+        
+        <div class="ui-overlay">
+            <div class="score-display">
+                <span class="score-label">SCORE</span>
+                <span class="score-value" id="score">0</span>
+            </div>
+            <div class="high-score-display">
+                <span class="score-label">BEST</span>
+                <span class="high-score-value" id="highScore">0</span>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="start-screen" id="startScreen">
+            <h1 class="game-title">GEOMETRY JUMP</h1>
+            <div class="instructions">
+                <div class="key-hint">
+                    <span class="key">SPACE</span>
+                    <span class="key-text">to jump</span>
+                </div>
+            </div>
+            <button class="play-btn" id="playBtn">PLAY</button>
+        </div>
+
+        <div class="game-over-screen" id="gameOverScreen">
+            <h2 class="game-over-title">GAME OVER</h2>
+            <div class="final-score">
+                <span>Score:</span>
+                <span id="finalScore">0</span>
+            </div>
+            <button class="retry-btn" id="retryBtn">RETRY</button>
+        </div>
+
+        <div class="ceiling"></div>
+        <div class="ground"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

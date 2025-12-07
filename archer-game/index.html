@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archer Battle - Endless Wave Survival</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🏹 Archer Battle - Real-Time Survival 🏹</h1>
+            <div class="game-info">
+                <div class="player-info player1-info">
+                    <h3>You</h3>
+                    <div class="health-bar">
+                        <div class="health-fill" id="health1"></div>
+                    </div>
+                    <p>Health: <span id="health1-text">100</span></p>
+                    <p>Points: <span id="points-display">0</span> 🏆</p>
+                    <p>Arrow: <span id="current-arrow">Normal</span></p>
+                </div>
+                <div class="turn-indicator" id="turn-indicator">
+                    Your Turn
+                </div>
+                <div class="player-info player2-info">
+                    <h3>Enemies</h3>
+                    <div class="health-bar">
+                        <div class="health-fill" id="health2"></div>
+                    </div>
+                    <p>Health: <span id="health2-text">100</span></p>
+                    <button id="shop-btn" class="shop-btn">🛒 Shop</button>
+                </div>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="shop" class="shop hidden">
+            <div class="shop-content">
+                <div class="shop-header">
+                    <h2>🏹 Arrow Selection</h2>
+                    <button class="shop-exit" onclick="toggleShop()">✖</button>
+                </div>
+                <p class="shop-points">All Arrows FREE - Choose Your Weapon!</p>
+                <p class="shop-hint">Press ESC or click ✖ to close</p>
+                <div class="shop-items">
+                    <div class="shop-item">
+                        <h3 style="color: #8B4513;">Normal Arrow</h3>
+                        <p>Standard arrow</p>
+                        <p class="cost">FREE</p>
+                        <button onclick="buyArrow('normal')">Equip</button>
+                    </div>
+                    <div class="shop-item">
+                        <h3 style="color: #32CD32;">Healing Arrow</h3>
+                        <p>Apples give +75 HP</p>
+                        <p class="cost">FREE</p>
+                        <button onclick="buyArrow('healing')">Equip</button>
+                    </div>
+                    <div class="shop-item">
+                        <h3 style="color: #FF4500;">Fire Arrow</h3>
+                        <p>Burns for 3 dmg/sec (5 sec)</p>
+                        <p class="cost">FREE</p>
+                        <button onclick="buyArrow('fire')">Equip</button>
+                    </div>
+                    <div class="shop-item">
+                        <h3 style="color: #9400D3;">Poison Arrow</h3>
+                        <p>Poisons for 2 dmg/sec (8 sec)</p>
+                        <p class="cost">FREE</p>
+                        <button onclick="buyArrow('poison')">Equip</button>
+                    </div>
+                    <div class="shop-item">
+                        <h3 style="color: #00BFFF;">Ice Arrow</h3>
+                        <p>Freezes enemy for 3 seconds</p>
+                        <p class="cost">FREE</p>
+                        <button onclick="buyArrow('ice')">Equip</button>
+                    </div>
+                    <div class="shop-item">
+                        <h3 style="color: #FF8C00;">Explosive Arrow</h3>
+                        <p>Explodes for area damage (20)</p>
+                        <p class="cost">FREE</p>
+                        <button onclick="buyArrow('explosive')">Equip</button>
+                    </div>
+                    <div class="shop-item">
+                        <h3 style="color: #FFD700;">Lightning Arrow</h3>
+                        <p>Chains to nearby enemy (15 dmg)</p>
+                        <p class="cost">FREE</p>
+                        <button onclick="buyArrow('lightning')">Equip</button>
+                    </div>
+                </div>
+                
+                <div class="shop-divider"></div>
+                
+                <div class="shop-health-section">
+                    <h2>💚 Health Purchase</h2>
+                    <div class="health-purchase">
+                        <div class="health-item">
+                            <h3 style="color: #FF1744;">❤️ +50 Max Health</h3>
+                            <p>PERMANENT upgrade - keeps after death!</p>
+                            <p style="font-size: 0.85em; color: #666;">Stack infinitely! 100→150→200→250...</p>
+                            <p class="cost" id="health-cost">20 Points</p>
+                            <button onclick="buyHealth()" class="health-btn">Buy +50 Max HP</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="shop-divider"></div>
+                
+                <div class="shop-damage-section">
+                    <h2>⚔️ Damage Upgrade</h2>
+                    <div class="health-purchase">
+                        <div class="health-item damage-item">
+                            <h3 style="color: #FF6B00;">⚔️ +25% Damage</h3>
+                            <p>PERMANENT upgrade - keeps after death!</p>
+                            <p style="font-size: 0.85em; color: #666;">Stack infinitely! 100%→125%→150%...</p>
+                            <p class="cost" id="damage-cost">25 Points</p>
+                            <button onclick="buyDamage()" class="damage-btn">Buy +25% Damage</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="shop-close" onclick="toggleShop()">Resume Game</button>
+            </div>
+        </div>
+
+        <div class="difficulty-settings">
+            <h3>⚙️ AI Hit Chance Settings</h3>
+            <div class="setting-row">
+                <label for="headshot-chance">💀 Headshot Chance: <span id="headshot-value">20</span>%</label>
+                <input type="range" id="headshot-chance" min="0" max="50" value="20" step="5">
+            </div>
+            <div class="setting-row">
+                <label for="bodyhit-chance">🎯 Body Hit Chance: <span id="bodyhit-value">40</span>%</label>
+                <input type="range" id="bodyhit-chance" min="0" max="100" value="40" step="5">
+            </div>
+            <div class="setting-row">
+                <label>🌬️ Miss Chance: <span id="miss-value">40</span>%</label>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>How to Play:</h3>
+            <p>🖱️ Move your mouse to aim (yellow line shows your trajectory)</p>
+            <p>⚡ Hold down mouse button to charge power, release to shoot!</p>
+            <p>💀 Hit the HEAD for 35-55 damage! Body shots do 15-35 damage</p>
+            <p>🍎 <strong>SHOOT FALLING APPLES for +50 HP!</strong> (up to your max)</p>
+            <p>🏆 <strong>Earn 5 points per enemy defeated!</strong></p>
+            <p>💚 <strong>BUY +50 MAX HEALTH in shop for 20 points!</strong> PERMANENT upgrade - survives death!</p>
+            <p>⚔️ <strong>BUY +25% DAMAGE in shop for 25 points!</strong> PERMANENT upgrade - survives death!</p>
+            <p>🏹 <strong>FREE Special Arrows:</strong> Fire (burn), Poison (DOT), Ice (freeze), Explosive (AOE), Lightning (chain), Healing (+75 HP apples)</p>
+            <p>🎯 <strong>REAL-TIME COMBAT!</strong> Shoot anytime - enemies shoot every 3.5 seconds!</p>
+            <p>🌊 Survive endless waves! Clear all enemies to advance to next level</p>
+            <p>👑 Every 5 levels: BOSS WAVE! Fight 1 boss (200 HP) + 2 regular enemies</p>
+            <p>📈 <strong>SCALING DIFFICULTY!</strong> Every 5 levels, enemies gain +25 HP and deal +10% damage!</p>
+            <p>⚙️ Adjust AI hit chances above - arrows auto-aim to guarantee hits!</p>
+            <p>💪 How many levels can you survive?</p>
+        </div>
+
+        <div id="game-over" class="game-over hidden">
+            <div class="game-over-content">
+                <h2 id="winner-text">Player 1 Wins!</h2>
+                <button id="restart-btn" class="restart-btn">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

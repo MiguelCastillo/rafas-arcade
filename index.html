@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rafa's Game Arcade</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    
+    <div class="container">
+        <header>
+            <h1 class="title">🎮 RAFA'S ARCADE 🎮</h1>
+            <p class="subtitle">Choose your adventure</p>
+        </header>
+
+        <div class="games-grid">
+            <!-- Archer Game Card -->
+            <a href="archer-game/index.html" class="game-card archer">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="game-icon">🏹</div>
+                    <h2 class="game-title">Archer Battle</h2>
+                    <p class="game-description">Endless wave survival! Defeat enemies with special arrows and upgrade your powers.</p>
+                    <div class="game-tags">
+                        <span class="tag">Action</span>
+                        <span class="tag">Survival</span>
+                        <span class="tag">Strategy</span>
+                    </div>
+                    <div class="play-button">
+                        <span>PLAY NOW</span>
+                        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Geometry Dash Card -->
+            <a href="geometry-dash/index.html" class="game-card geometry">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="game-icon">🔷</div>
+                    <h2 class="game-title">Geometry Jump</h2>
+                    <p class="game-description">Jump through obstacles in this fast-paced rhythm game. How far can you go?</p>
+                    <div class="game-tags">
+                        <span class="tag">Arcade</span>
+                        <span class="tag">Rhythm</span>
+                        <span class="tag">Fast-Paced</span>
+                    </div>
+                    <div class="play-button">
+                        <span>PLAY NOW</span>
+                        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Space Waves Card -->
+            <a href="space waves/index.html" class="game-card space">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="game-icon">🚀</div>
+                    <h2 class="game-title">Space Waves</h2>
+                    <p class="game-description">Navigate through the neon void! Dodge obstacles in this tunnel runner adventure.</p>
+                    <div class="game-tags">
+                        <span class="tag">Space</span>
+                        <span class="tag">Runner</span>
+                        <span class="tag">Neon</span>
+                    </div>
+                    <div class="play-button">
+                        <span>PLAY NOW</span>
+                        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <footer>
+            <p>Press any game to start playing!</p>
+        </footer>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const container = document.querySelector('.container');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+    </script>
+</body>
+</html>
