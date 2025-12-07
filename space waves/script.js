@@ -186,7 +186,7 @@ function restartGame() {
     // Respawn at last checkpoint
     score = lastCheckpoint;
     frameCount = 0;
-    difficulty = 1 + Math.floor(score / 5) * 0.3;
+    difficulty = 1 + Math.floor(score / 10) * 0.3;
     gameSpeed = baseSpeed + (difficulty - 1) * 1.5;
     obstacles = [];
     particles = [];
@@ -805,7 +805,7 @@ function update() {
     frameCount++;
     
     // Increase difficulty over time (faster scaling)
-    difficulty = 1 + Math.floor(score / 5) * 0.3;
+    difficulty = 1 + Math.floor(score / 10) * 0.3;
     gameSpeed = baseSpeed + (difficulty - 1) * 1.5;
     
     // Player physics - abrupt transitions between floating and falling
