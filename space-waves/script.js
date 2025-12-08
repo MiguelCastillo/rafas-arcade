@@ -89,6 +89,11 @@ let terrain = {
 // Particles
 let particles = [];
 
+// Helper function to get tunnel height for relative sizing
+function getTunnelHeight() {
+    return terrain.baseGround - terrain.baseCeiling;
+}
+
 // Input handling
 let isFlying = false;
 
@@ -335,8 +340,8 @@ function spawnFloorObstacle() {
     if (levelTransitioning) return;
     
     const x = canvas.width + 100;
-    const minGap = 200;
-    const tunnelHeight = terrain.baseGround - terrain.baseCeiling;
+    const tunnelHeight = getTunnelHeight();
+    const minGap = tunnelHeight * 0.35; // 35% of tunnel as minimum gap
     const maxHillHeight = tunnelHeight - minGap;
     
     // Randomly choose floor or ceiling
@@ -347,20 +352,22 @@ function spawnFloorObstacle() {
     if (isSpike) {
         // Single or small cluster of spikes
         const spikeCount = Math.floor(Math.random() * 2) + 1;
+        const spikeWidth = tunnelHeight * 0.1; // 10% of tunnel height
+        const spikeSpacing = tunnelHeight * 0.12;
         for (let i = 0; i < spikeCount; i++) {
             obstacles.push({
                 type: onCeiling ? ObstacleType.CEILING_SPIKE : ObstacleType.GROUND_SPIKE,
-                x: x + i * 60,
+                x: x + i * spikeSpacing,
                 y: onCeiling ? terrain.baseCeiling : terrain.baseGround,
-                width: 50,
-                height: 90 + Math.random() * 50,
+                width: spikeWidth,
+                height: tunnelHeight * (0.18 + Math.random() * 0.1), // 18-28% of tunnel
                 passed: false
             });
         }
     } else {
         // Hill (from floor) or stalactite-like hill (from ceiling)
-        const hillW = 150 + Math.random() * 80;
-        const hillH = Math.min(80 + Math.random() * 50, maxHillHeight);
+        const hillW = tunnelHeight * (0.3 + Math.random() * 0.15); // 30-45% of tunnel
+        const hillH = Math.min(tunnelHeight * (0.16 + Math.random() * 0.1), maxHillHeight); // 16-26% of tunnel
         
         obstacles.push({
             type: ObstacleType.HILL,
@@ -415,18 +422,21 @@ function spawnObstacle() {
     
     const type = types[Math.floor(Math.random() * types.length)];
     const x = canvas.width + 100;
+    const tunnelHeight = getTunnelHeight();
     
     switch (type) {
         case ObstacleType.GROUND_SPIKE:
             // Cluster of spikes on ground
             const spikeCount = Math.floor(Math.random() * 3) + 2;
+            const gsWidth = tunnelHeight * 0.1;
+            const gsSpacing = tunnelHeight * 0.12;
             for (let i = 0; i < spikeCount; i++) {
                 obstacles.push({
                     type: type,
-                    x: x + i * 60,
+                    x: x + i * gsSpacing,
                     y: terrain.baseGround,
-                    width: 50,
-                    height: 90 + Math.random() * 50,
+                    width: gsWidth,
+                    height: tunnelHeight * (0.18 + Math.random() * 0.1),
                     passed: false
                 });
             }
@@ -435,13 +445,15 @@ function spawnObstacle() {
         case ObstacleType.CEILING_SPIKE:
             // Spikes hanging from ceiling
             const ceilSpikeCount = Math.floor(Math.random() * 3) + 2;
+            const csWidth = tunnelHeight * 0.1;
+            const csSpacing = tunnelHeight * 0.12;
             for (let i = 0; i < ceilSpikeCount; i++) {
                 obstacles.push({
                     type: type,
-                    x: x + i * 60,
+                    x: x + i * csSpacing,
                     y: terrain.baseCeiling,
-                    width: 50,
-                    height: 90 + Math.random() * 50,
+                    width: csWidth,
+                    height: tunnelHeight * (0.18 + Math.random() * 0.1),
                     passed: false
                 });
             }
@@ -449,13 +461,15 @@ function spawnObstacle() {
             
         case ObstacleType.FLOATING_SPIKE:
             // Floating spike in the middle area
-            const floatY = terrain.baseCeiling + 100 + Math.random() * (terrain.baseGround - terrain.baseCeiling - 200);
+            const fsMargin = tunnelHeight * 0.2;
+            const floatY = terrain.baseCeiling + fsMargin + Math.random() * (tunnelHeight - fsMargin * 2);
+            const fsSize = tunnelHeight * 0.14;
             obstacles.push({
                 type: type,
                 x: x,
                 y: floatY,
-                width: 70,
-                height: 70,
+                width: fsSize,
+                height: fsSize,
                 rotation: Math.random() * Math.PI * 2,
                 rotationSpeed: 0.05,
                 passed: false
@@ -466,18 +480,16 @@ function spawnObstacle() {
             // Create hill patterns - multiple hills forming terrain to navigate
             const patternType = Math.floor(Math.random() * 5);
             
-            // Minimum gap of 200 pixels must always be maintained
-            const minGap = 200;
-            const tunnelHeight = terrain.baseGround - terrain.baseCeiling;
+            // Minimum gap as percentage of tunnel height
+            const minGap = tunnelHeight * 0.35;
             const maxHillHeight = tunnelHeight - minGap;
             
             if (patternType === 0) {
                 // Wave pattern - alternating ground and ceiling hills
                 const waveCount = 3 + Math.floor(Math.random() * 3);
                 for (let i = 0; i < waveCount; i++) {
-                    const hillW = 200 + Math.random() * 100;
-                    // Ensure hill doesn't exceed max height (leaves 200px gap)
-                    const hillH = Math.min(100 + Math.random() * 60, maxHillHeight);
+                    const hillW = tunnelHeight * (0.4 + Math.random() * 0.2);
+                    const hillH = Math.min(tunnelHeight * (0.2 + Math.random() * 0.12), maxHillHeight);
                     const isGround = i % 2 === 0;
                     obstacles.push({
                         type: type,
@@ -489,15 +501,17 @@ function spawnObstacle() {
                         passed: false
                     });
                     // Add spike on top of some hills (only if there's room)
-                    if (Math.random() > 0.5 && hillH + 70 < maxHillHeight) {
-                        const spikeX = x + i * (hillW * 0.7) + hillW / 2 - 25;
+                    const spikeH = tunnelHeight * 0.14;
+                    if (Math.random() > 0.5 && hillH + spikeH < maxHillHeight) {
+                        const spikeW = tunnelHeight * 0.1;
+                        const spikeX = x + i * (hillW * 0.7) + hillW / 2 - spikeW / 2;
                         const spikeY = isGround ? terrain.baseGround - hillH : terrain.baseCeiling + hillH;
                         obstacles.push({
                             type: isGround ? ObstacleType.GROUND_SPIKE : ObstacleType.CEILING_SPIKE,
                             x: spikeX,
                             y: isGround ? spikeY : terrain.baseCeiling + hillH,
-                            width: 50,
-                            height: 70,
+                            width: spikeW,
+                            height: spikeH,
                             onHill: true,
                             hillY: spikeY,
                             passed: false
@@ -505,18 +519,18 @@ function spawnObstacle() {
                     }
                 }
             } else if (patternType === 1) {
-                // Corridor - ground and ceiling hills creating a passage with guaranteed 200px gap
+                // Corridor - ground and ceiling hills creating a passage
                 const corridorLength = 3 + Math.floor(Math.random() * 2);
-                const gapHeight = minGap; // Exactly 200px gap
-                const gapCenter = terrain.baseCeiling + tunnelHeight / 2 + (Math.random() - 0.5) * 80;
+                const gapHeight = minGap;
+                const gapCenter = terrain.baseCeiling + tunnelHeight / 2 + (Math.random() - 0.5) * tunnelHeight * 0.16;
                 
                 for (let i = 0; i < corridorLength; i++) {
-                    const hillW = 180 + Math.random() * 80;
+                    const hillW = tunnelHeight * (0.36 + Math.random() * 0.16);
                     const groundHillHeight = terrain.baseGround - (gapCenter + gapHeight / 2);
                     const ceilingHillHeight = (gapCenter - gapHeight / 2) - terrain.baseCeiling;
                     
                     // Ground hill
-                    if (groundHillHeight > 50) {
+                    if (groundHillHeight > tunnelHeight * 0.1) {
                         obstacles.push({
                             type: type,
                             x: x + i * (hillW * 0.8),
@@ -528,7 +542,7 @@ function spawnObstacle() {
                         });
                     }
                     // Ceiling hill
-                    if (ceilingHillHeight > 50) {
+                    if (ceilingHillHeight > tunnelHeight * 0.1) {
                         obstacles.push({
                             type: type,
                             x: x + i * (hillW * 0.8),
@@ -541,13 +555,14 @@ function spawnObstacle() {
                     }
                 }
             } else if (patternType === 2) {
-                // Staircase - ascending or descending hills (200px gap from ceiling)
+                // Staircase - ascending or descending hills
                 const stairCount = 4 + Math.floor(Math.random() * 3);
                 const ascending = Math.random() > 0.5;
                 for (let i = 0; i < stairCount; i++) {
-                    const hillW = 150 + Math.random() * 70;
-                    const baseHeight = 60;
-                    const stepHeight = ascending ? baseHeight + i * 35 : baseHeight + (stairCount - i - 1) * 35;
+                    const hillW = tunnelHeight * (0.3 + Math.random() * 0.14);
+                    const baseHeight = tunnelHeight * 0.12;
+                    const stepInc = tunnelHeight * 0.07;
+                    const stepHeight = ascending ? baseHeight + i * stepInc : baseHeight + (stairCount - i - 1) * stepInc;
                     const clampedHeight = Math.min(stepHeight, maxHillHeight);
                     obstacles.push({
                         type: type,
@@ -559,28 +574,31 @@ function spawnObstacle() {
                         passed: false
                     });
                     // Add spikes on some steps (only if there's room)
-                    if (Math.random() > 0.6 && clampedHeight + 70 < maxHillHeight) {
+                    const spikeH = tunnelHeight * 0.14;
+                    if (Math.random() > 0.6 && clampedHeight + spikeH < maxHillHeight) {
+                        const spikeW = tunnelHeight * 0.1;
                         obstacles.push({
                             type: ObstacleType.GROUND_SPIKE,
-                            x: x + i * (hillW * 0.9) + hillW / 2 - 25,
+                            x: x + i * (hillW * 0.9) + hillW / 2 - spikeW / 2,
                             y: terrain.baseGround - clampedHeight,
-                            width: 50,
-                            height: 70,
+                            width: spikeW,
+                            height: spikeH,
                             onHill: true,
                             passed: false
                         });
                     }
                 }
             } else if (patternType === 3) {
-                // Valley - two tall hills with a dip in between (200px gap from ceiling)
-                const valleyWidth = 350 + Math.random() * 150;
-                const peakHeight = Math.min(120 + Math.random() * 60, maxHillHeight);
+                // Valley - two tall hills with a dip in between
+                const valleyWidth = tunnelHeight * (0.7 + Math.random() * 0.3);
+                const peakHeight = Math.min(tunnelHeight * (0.24 + Math.random() * 0.12), maxHillHeight);
+                const peakWidth = tunnelHeight * 0.4;
                 // Left peak
                 obstacles.push({
                     type: type,
                     x: x,
                     y: terrain.baseGround,
-                    width: 200,
+                    width: peakWidth,
                     height: peakHeight,
                     fromCeiling: false,
                     passed: false
@@ -590,7 +608,7 @@ function spawnObstacle() {
                     type: type,
                     x: x + valleyWidth,
                     y: terrain.baseGround,
-                    width: 200,
+                    width: peakWidth,
                     height: peakHeight,
                     fromCeiling: false,
                     passed: false
@@ -599,33 +617,34 @@ function spawnObstacle() {
                 if (Math.random() > 0.4) {
                     obstacles.push({
                         type: ObstacleType.CRYSTAL,
-                        x: x + valleyWidth / 2 + 100,
+                        x: x + valleyWidth / 2 + tunnelHeight * 0.2,
                         y: terrain.baseGround - peakHeight / 2,
-                        size: 70 + Math.random() * 30,
+                        size: tunnelHeight * (0.14 + Math.random() * 0.06),
                         bobOffset: Math.random() * Math.PI * 2,
                         passed: false
                     });
                 }
                 // Spikes on peaks (only if room)
-                if (Math.random() > 0.5 && peakHeight + 80 < maxHillHeight) {
+                const spikeH = tunnelHeight * 0.16;
+                if (Math.random() > 0.5 && peakHeight + spikeH < maxHillHeight) {
                     obstacles.push({
                         type: ObstacleType.GROUND_SPIKE,
-                        x: x + 75,
+                        x: x + peakWidth * 0.375,
                         y: terrain.baseGround - peakHeight,
-                        width: 50,
-                        height: 80,
+                        width: tunnelHeight * 0.1,
+                        height: spikeH,
                         onHill: true,
                         passed: false
                     });
                 }
             } else {
-                // Mountain range - series of varying height hills (200px gap from ceiling)
+                // Mountain range - series of varying height hills
                 const mountainCount = 5 + Math.floor(Math.random() * 3);
                 for (let i = 0; i < mountainCount; i++) {
-                    const hillW = 140 + Math.random() * 80;
+                    const hillW = tunnelHeight * (0.28 + Math.random() * 0.16);
                     // Create a wave-like height pattern
-                    const heightMod = Math.sin(i * 0.8) * 50;
-                    const hillH = Math.min(Math.max(50, 80 + heightMod + Math.random() * 40), maxHillHeight);
+                    const heightMod = Math.sin(i * 0.8) * tunnelHeight * 0.1;
+                    const hillH = Math.min(Math.max(tunnelHeight * 0.1, tunnelHeight * 0.16 + heightMod + Math.random() * tunnelHeight * 0.08), maxHillHeight);
                     obstacles.push({
                         type: type,
                         x: x + i * (hillW * 0.6),
@@ -636,13 +655,14 @@ function spawnObstacle() {
                         passed: false
                     });
                     // Occasional spikes on peaks (only if room)
-                    if (Math.random() > 0.7 && hillH > 200 && hillH + 60 < maxHillHeight) {
+                    const spikeH = tunnelHeight * 0.12;
+                    if (Math.random() > 0.7 && hillH > tunnelHeight * 0.4 && hillH + spikeH < maxHillHeight) {
                         obstacles.push({
                             type: ObstacleType.GROUND_SPIKE,
-                            x: x + i * (hillW * 0.6) + hillW / 2 - 20,
+                            x: x + i * (hillW * 0.6) + hillW / 2 - tunnelHeight * 0.04,
                             y: terrain.baseGround - hillH,
-                            width: 40,
-                            height: 60,
+                            width: tunnelHeight * 0.08,
+                            height: spikeH,
                             onHill: true,
                             passed: false
                         });
@@ -653,8 +673,8 @@ function spawnObstacle() {
             
         case ObstacleType.STALACTITE:
             // Ceiling formation to fly under
-            const stalWidth = 180 + Math.random() * 100;
-            const stalHeight = 100 + Math.random() * 60;
+            const stalWidth = tunnelHeight * (0.36 + Math.random() * 0.2);
+            const stalHeight = tunnelHeight * (0.2 + Math.random() * 0.12);
             obstacles.push({
                 type: type,
                 x: x,
@@ -667,12 +687,13 @@ function spawnObstacle() {
             
         case ObstacleType.CRYSTAL:
             // Diamond-shaped obstacle floating
-            const crystalY = terrain.baseCeiling + 120 + Math.random() * (terrain.baseGround - terrain.baseCeiling - 240);
+            const crMargin = tunnelHeight * 0.24;
+            const crystalY = terrain.baseCeiling + crMargin + Math.random() * (tunnelHeight - crMargin * 2);
             obstacles.push({
                 type: type,
                 x: x,
                 y: crystalY,
-                size: 60 + Math.random() * 40,
+                size: tunnelHeight * (0.12 + Math.random() * 0.08),
                 bobOffset: Math.random() * Math.PI * 2,
                 passed: false
             });
@@ -680,12 +701,13 @@ function spawnObstacle() {
             
         case ObstacleType.SAW:
             // Spinning saw blade
-            const sawY = terrain.baseCeiling + 100 + Math.random() * (terrain.baseGround - terrain.baseCeiling - 200);
+            const sawMargin = tunnelHeight * 0.2;
+            const sawY = terrain.baseCeiling + sawMargin + Math.random() * (tunnelHeight - sawMargin * 2);
             obstacles.push({
                 type: type,
                 x: x,
                 y: sawY,
-                radius: 55 + Math.random() * 30,
+                radius: tunnelHeight * (0.11 + Math.random() * 0.06),
                 rotation: 0,
                 passed: false
             });
@@ -693,13 +715,14 @@ function spawnObstacle() {
             
         case ObstacleType.LASER:
             // Horizontal laser beam
-            const laserY = terrain.baseCeiling + 80 + Math.random() * (terrain.baseGround - terrain.baseCeiling - 160);
+            const laserMargin = tunnelHeight * 0.16;
+            const laserY = terrain.baseCeiling + laserMargin + Math.random() * (tunnelHeight - laserMargin * 2);
             obstacles.push({
                 type: type,
                 x: x,
                 y: laserY,
-                width: 300,
-                height: 14,
+                width: tunnelHeight * 0.6,
+                height: tunnelHeight * 0.028,
                 pulsePhase: 0,
                 passed: false
             });
@@ -709,14 +732,15 @@ function spawnObstacle() {
         case ObstacleType.LASER_GRID:
             // Multiple crossing lasers
             const gridCount = 2 + Math.floor(Math.random() * 2);
+            const gridMargin = tunnelHeight * 0.12;
             for (let i = 0; i < gridCount; i++) {
-                const gridY = terrain.baseCeiling + 60 + (i * (terrain.baseGround - terrain.baseCeiling - 120) / gridCount);
+                const gridY = terrain.baseCeiling + gridMargin + (i * (tunnelHeight - gridMargin * 2) / gridCount);
                 obstacles.push({
                     type: type,
-                    x: x + i * 40,
+                    x: x + i * tunnelHeight * 0.08,
                     y: gridY,
-                    width: 250,
-                    height: 10,
+                    width: tunnelHeight * 0.5,
+                    height: tunnelHeight * 0.02,
                     pulsePhase: i * Math.PI / 2,
                     passed: false
                 });
@@ -730,10 +754,10 @@ function spawnObstacle() {
                 type: type,
                 x: x,
                 y: wallStartY,
-                width: 60,
-                height: 150,
+                width: tunnelHeight * 0.12,
+                height: tunnelHeight * 0.3,
                 startY: wallStartY,
-                moveRange: 100,
+                moveRange: tunnelHeight * 0.2,
                 moveSpeed: 0.03,
                 movePhase: Math.random() * Math.PI * 2,
                 passed: false
@@ -742,13 +766,15 @@ function spawnObstacle() {
             
         case ObstacleType.PULSE_ORB:
             // Orb that pulses and grows/shrinks
-            const orbY = terrain.baseCeiling + 100 + Math.random() * (terrain.baseGround - terrain.baseCeiling - 200);
+            const orbMargin = tunnelHeight * 0.2;
+            const orbY = terrain.baseCeiling + orbMargin + Math.random() * (tunnelHeight - orbMargin * 2);
+            const orbBaseRadius = tunnelHeight * 0.08;
             obstacles.push({
                 type: type,
                 x: x,
                 y: orbY,
-                baseRadius: 40,
-                radius: 40,
+                baseRadius: orbBaseRadius,
+                radius: orbBaseRadius,
                 pulsePhase: Math.random() * Math.PI * 2,
                 passed: false
             });
@@ -757,14 +783,16 @@ function spawnObstacle() {
         case ObstacleType.ZIGZAG_SPIKE:
             // Spikes that form a zigzag pattern
             const zigCount = 4;
+            const zigWidth = tunnelHeight * 0.1;
+            const zigSpacing = tunnelHeight * 0.16;
             for (let i = 0; i < zigCount; i++) {
                 const fromTop = i % 2 === 0;
                 obstacles.push({
                     type: fromTop ? ObstacleType.CEILING_SPIKE : ObstacleType.GROUND_SPIKE,
-                    x: x + i * 80,
+                    x: x + i * zigSpacing,
                     y: fromTop ? terrain.baseCeiling : terrain.baseGround,
-                    width: 50,
-                    height: 120 + Math.random() * 40,
+                    width: zigWidth,
+                    height: tunnelHeight * (0.24 + Math.random() * 0.08),
                     passed: false
                 });
             }
@@ -772,25 +800,27 @@ function spawnObstacle() {
             
         case ObstacleType.FLOATING_PLATFORM:
             // Platform you must go around
-            const platY = terrain.baseCeiling + 80 + Math.random() * (terrain.baseGround - terrain.baseCeiling - 160);
+            const platMargin = tunnelHeight * 0.16;
+            const platY = terrain.baseCeiling + platMargin + Math.random() * (tunnelHeight - platMargin * 2);
             obstacles.push({
                 type: type,
                 x: x,
                 y: platY,
-                width: 200,
-                height: 30,
+                width: tunnelHeight * 0.4,
+                height: tunnelHeight * 0.06,
                 passed: false
             });
             break;
             
         case ObstacleType.VORTEX:
             // Spinning vortex that pulls you in
-            const vortexY = terrain.baseCeiling + 120 + Math.random() * (terrain.baseGround - terrain.baseCeiling - 240);
+            const vortexMargin = tunnelHeight * 0.24;
+            const vortexY = terrain.baseCeiling + vortexMargin + Math.random() * (tunnelHeight - vortexMargin * 2);
             obstacles.push({
                 type: type,
                 x: x,
                 y: vortexY,
-                radius: 60,
+                radius: tunnelHeight * 0.12,
                 rotation: 0,
                 pullStrength: 0.3,
                 passed: false
@@ -808,14 +838,18 @@ function update() {
     difficulty = 1 + Math.floor(score / 10) * 0.3;
     gameSpeed = baseSpeed + (difficulty - 1) * 1.5;
     
-    // Player physics - abrupt transitions between floating and falling
+    // Player physics - abrupt transitions between floating and falling (relative to tunnel size)
+    const tunnelH = getTunnelHeight();
+    const lift = -tunnelH * 0.028; // Upward velocity as % of tunnel
+    const gravity = tunnelH * 0.02; // Downward velocity as % of tunnel
+    const maxVel = tunnelH * 0.036; // Max velocity as % of tunnel
     if (isFlying) {
-        player.velocity = -14; // Instant upward velocity (lift)
+        player.velocity = lift;
     } else {
-        player.velocity = 10; // Instant downward velocity (gravity)
+        player.velocity = gravity;
     }
     
-    player.velocity = Math.max(-player.maxVelocity, Math.min(player.maxVelocity, player.velocity));
+    player.velocity = Math.max(-maxVel, Math.min(maxVel, player.velocity));
     player.y += player.velocity;
     
     // Rotation based on velocity
@@ -855,7 +889,7 @@ function update() {
     const spawnRate = Math.max(15, 22 - difficulty * 2);
     if (frameCount % Math.floor(spawnRate) === 0) {
         // Only spawn if there's enough clearance from existing obstacles
-        const minClearance = 150; // Minimum gap between obstacles
+        const minClearance = getTunnelHeight() * 0.3; // Minimum gap between obstacles
         const rightmostX = obstacles.reduce((max, obs) => {
             const obsRight = obs.x + (obs.width || obs.radius * 2 || obs.size * 2 || 50);
             return Math.max(max, obsRight);
@@ -1622,7 +1656,7 @@ function drawMovingWall(obs) {
 
 function drawPulseOrb(obs) {
     const pulse = (Math.sin(obs.pulsePhase) + 1) / 2;
-    const currentRadius = obs.baseRadius + pulse * 20;
+    const currentRadius = obs.baseRadius + pulse * obs.baseRadius * 0.5; // Pulse by 50% of base size
     obs.radius = currentRadius;
     
     ctx.shadowBlur = 0;
